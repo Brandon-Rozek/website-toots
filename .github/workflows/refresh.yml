@@ -15,7 +15,7 @@ jobs:
 
       - name: Setup git config
         run: |
-          git config usegit pusr.name "GitHub Actions Bot"
+          git config user.name "GitHub Actions Bot"
           git config user.email "<>"
 
       - name: Grab latest toots
