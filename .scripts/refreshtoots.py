@@ -40,8 +40,11 @@ def retrieve_toots_from_server():
         response: Optional[HTTPResponse] = None
 
         try:
-            response = request.urlopen(url)
-        except Exception:
+            req = request.Request(url)
+            req.add_header('User-Agent', 'Python3-Urllib/3')
+            response = request.urlopen(req)
+        except Exception as e:
+            print(e)
             print("Unable to grab toots from Mastodon.")
 
         if response is None:
