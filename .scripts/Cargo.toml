@@ -1,0 +1,20 @@
+[package]
+name = "website-toots"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tera = "1"
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+regex = "1.10.5"
+
+[[bin]]
+name = "retrieve_toots"
+path = "src/retrieve_toots.rs"
+
+[[bin]]
+name = "generate_md"
+path = "src/generate_md.rs"

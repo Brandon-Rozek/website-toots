@@ -5,15 +5,12 @@ on:
   schedule:
     - cron: "12 23 * * *"
 
-#concurrency:
-#  cancel-in-progress: true
-
 defaults:
   run:
     shell: bash
 
 jobs:
-  build_and_publish:
+  build_and_sync:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,9 +22,20 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
 
-      - name: Grab latest toots
+      - name: Install Rust
         run: |
-          ./.scripts/refreshtoots.py
+          sudo apt update
+          sudo apt install -y rustc cargo
+
+      - name: Build
+        run: |
+          cd .scripts
+          cargo build --release
+
+      - name: Retrieve toots
+        run: |
+          cd .scripts
+          ./target/release/retrieve_toots
 
       - name: Check if there's any changes
         id: verify_diff
@@ -37,6 +45,6 @@ jobs:
       - name: Commit and push
         if: steps.verify_diff.outputs.changed == 'true'
         run: |
-          git add *.md
+          git add .data
           git commit -m "New/Modified Toots"
           git push origin main
