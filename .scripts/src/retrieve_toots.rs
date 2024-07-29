@@ -2,7 +2,9 @@ use regex::Regex;
 use reqwest::header::HeaderValue;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
+use std::io::{BufReader, Write};
+use std::thread::sleep;
+use std::time::Duration;
 
 static RETRIEVE_NUM_TOOTS: usize = 1000;
 static SERVER: &str = "fosstodon.org";
@@ -144,9 +146,32 @@ async fn main() {
                     .expect("Failed to create directory");
             }
 
-            let path = format!("{}/{}.json", data_dir, toot_id);
-            write_json_to_file(&item, path.as_ref())
+            let path: String = format!("{}/{}.json", data_dir, toot_id);
+
+            let mut update_json = false;
+
+            let f = File::open(path.clone());
+            if f.is_ok() {
+                let reader = BufReader::new(f.unwrap());
+                let f_json_result: Result<serde_json::Value, _> = serde_json::from_reader(reader);
+                if f_json_result.is_ok() {
+                    // If the JSON from the network is different, update
+                    if f_json_result.unwrap() != *item {
+                        update_json = true;
+                    }
+                }
+            } else {
+                // File doesn't exist (probably) so
+                // try to write the new JSON
+                update_json = true;
+            }
+
+            if update_json {
+                write_json_to_file(&item, path.as_ref())
                 .expect("Failed to write to file");
+            }
+
+
         }
         println!("Retrieved {} toots from server", json_array.len());
 
@@ -164,5 +189,8 @@ async fn main() {
             Ok(next_url) => url = next_url,
             Err(_) => more_toots_exist = false,
         }
+
+        // Sleep for the 1 second to not overload the server
+        sleep(Duration::new(1, 0));
     }
 }
