@@ -5,13 +5,13 @@ use tera::Tera;
 use tera::Context;
 
 fn main() {
-    println!("Hello, world!");
-
     let mut tera = Tera::default();
     tera.add_template_file("src/toot.md", None).unwrap();
 
     let data_dir = std::fs::read_dir("../.data")
         .expect("Failed to open data directory");
+
+    let mut count = 0;
 
     for entry in data_dir {
 
@@ -59,6 +59,9 @@ fn main() {
         file.write_all(output.as_bytes())
             .expect("Failed to write to markdown file");
 
+        count += 1;
     }
+
+    println!("Successfully generated {} Markdown Files", count);
 
 }
