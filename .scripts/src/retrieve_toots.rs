@@ -16,22 +16,15 @@ fn reformat_toot(x: &mut serde_json::Value) -> Result<(), String> {
         .ok_or_else(|| "JSON not an object".to_string())?;
 
     // URL -> Syndication
-    let toot_url: serde_json::Value = toot
-        .get_mut("url")
-        .ok_or_else(|| "Missing URL".to_string())?
-        .to_owned();
     toot.remove("uri");
-    toot.remove("url");
-    toot.insert("syndication".to_string(), toot_url.to_owned());
+    let toot_url = toot.remove("url")
+        .ok_or_else(|| "Missing URL".to_string())?;
+    toot.insert("syndication".to_string(), toot_url);
 
     // Created At -> Date
-    let toot_date: serde_json::Value = toot
-        .get_mut("created_at")
-        .ok_or_else(|| "Missing created_at".to_string())?
-        .to_owned();
-    // Note: Already checked whether created_at exists
-    toot.remove("created_at");
-    toot.insert("date".to_string(), toot_date.to_owned());
+    let toot_date = toot.remove("created_at")
+        .ok_or_else(|| "Missing created_at".to_string())?;
+    toot.insert("date".to_string(), toot_date);
 
     // Strip out highly dynamic account information
     let account: &mut tera::Map<String, serde_json::Value> = toot
